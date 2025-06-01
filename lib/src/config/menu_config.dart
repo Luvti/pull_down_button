@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:meta/meta.dart';
 
 import '../../pull_down_button.dart';
-import 'content_size_category.dart';
+import '../_internals/content_size_category.dart';
 
 /// Used to configure how the [PullDownMenuActionsRow] shows its
 /// [PullDownMenuItem]'s and their maximum count.
@@ -11,7 +11,6 @@ import 'content_size_category.dart';
 ///
 /// * preferredElementSize:
 ///   https://developer.apple.com/documentation/uikit/uimenu/4013313-preferredelementsize
-@internal
 enum ElementSize {
   /// Compact layout, icon-only representation.
   ///
@@ -88,7 +87,6 @@ enum ElementSize {
 /// Is internally used by [PullDownMenuActionsRow] to provide [ElementSize] to
 /// all descendant [PullDownMenuItem]s.
 @immutable
-@internal
 class ActionsRowSizeConfig extends InheritedWidget {
   /// Creates [ActionsRowSizeConfig].
   const ActionsRowSizeConfig({
@@ -121,7 +119,6 @@ class ActionsRowSizeConfig extends InheritedWidget {
 /// Is internally used by [PullDownButton], [showPullDownMenu], or
 /// [PullDownMenu].
 @immutable
-@internal
 class MenuConfig extends InheritedWidget {
   /// Creates [MenuConfig].
   const MenuConfig({

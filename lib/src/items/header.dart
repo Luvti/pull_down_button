@@ -4,7 +4,7 @@ import '../../pull_down_button.dart';
 import '../_internals/button.dart';
 import '../_internals/content_size_category.dart';
 import '../_internals/item_layout.dart';
-import '../_internals/menu_config.dart';
+import '../config/menu_config.dart';
 
 const double _kHeaderVerticalPadding = 10;
 const double _kHeaderStartPadding = 16;
@@ -153,6 +153,7 @@ class PullDownMenuHeader extends StatelessWidget implements PullDownMenuEntry {
             icon: icon,
             iconWidget: iconWidget,
             onHoverTextColor: theme.onHoverTextColor!,
+            iconSize: theme.iconSize,
           ),
         ),
       ),
@@ -173,6 +174,7 @@ class _HeaderBody extends StatelessWidget {
     required this.icon,
     required this.iconWidget,
     required this.onHoverTextColor,
+    this.iconSize,
   });
 
   final Widget leading;
@@ -183,6 +185,7 @@ class _HeaderBody extends StatelessWidget {
   final IconData? icon;
   final Widget? iconWidget;
   final Color onHoverTextColor;
+  final double? iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +245,11 @@ class _HeaderBody extends StatelessWidget {
               ),
               child: IconActionBox(
                 color: isHovered ? onHoverTextColor : titleStyle.color!,
-                child: iconWidget ?? Icon(icon),
+                child: iconWidget ??
+                    Icon(
+                      icon,
+                      size: iconSize,
+                    ),
               ),
             ),
           ),

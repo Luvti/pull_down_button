@@ -61,7 +61,7 @@ class Item extends StatelessWidget {
                 PullDownMenuItem(
                   onTap: noAction,
                   title: 'Title',
-                  iconWidget: CircleAvatar(
+                  replaceIconWidget: CircleAvatar(
                     backgroundColor: CupertinoColors.systemCyan,
                     foregroundColor: CupertinoColors.systemBackground,
                     child: Text('A', style: TextStyle(fontSize: 13)),
@@ -132,7 +132,7 @@ class Item extends StatelessWidget {
                   selected: true,
                   onTap: noAction,
                   title: 'Title',
-                  iconWidget: CircleAvatar(
+                  replaceIconWidget: CircleAvatar(
                     backgroundColor: CupertinoColors.systemCyan,
                     foregroundColor: CupertinoColors.systemBackground,
                     child: Text('A', style: TextStyle(fontSize: 13)),

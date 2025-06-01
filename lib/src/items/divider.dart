@@ -121,9 +121,8 @@ class MenuSeparator extends StatelessWidget implements PullDownMenuEntry {
 
   /// Helper method that simplifies separation of side-by-side appearance row
   /// items.
-  static List<Widget> wrapSideBySide(
-    List<PullDownMenuItem> items,
-  ) {
+  static List<Widget> wrapSideBySide(List<PullDownMenuItem> items,
+      {required bool showVerticalSeparators}) {
     if (items.isEmpty) {
       return items;
     } else if (items.length == 1) {
@@ -135,7 +134,8 @@ class MenuSeparator extends StatelessWidget implements PullDownMenuEntry {
     return [
       for (final i in items.take(items.length - 1)) ...[
         Expanded(child: i),
-        divider,
+        if (showVerticalSeparators) // Only add vertical separators if needed
+          divider,
       ],
       Expanded(child: items.last),
     ];

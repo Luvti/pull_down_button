@@ -5,7 +5,7 @@ import 'package:meta/meta.dart';
 import '../../pull_down_button.dart';
 import 'animation.dart';
 import 'continuous_swipe.dart';
-import 'menu_config.dart';
+import '../config/menu_config.dart';
 import 'route_menu.dart';
 
 part 'route_layout.dart';

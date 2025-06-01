@@ -76,30 +76,70 @@ class ExampleMenu extends StatelessWidget {
             icon: CupertinoIcons.profile_circled,
           ),
           const PullDownMenuDivider.large(),
-          PullDownMenuActionsRow.medium(
+          PullDownMenuActionsRow.small(
             items: [
               PullDownMenuItem(
                 onTap: () {},
-                title: 'Reply',
+                title: 'icon',
                 icon: CupertinoIcons.arrowshape_turn_up_left,
               ),
               PullDownMenuItem(
                 onTap: () {},
-                title: 'Copy',
-                icon: CupertinoIcons.doc_on_doc,
+                title: 'iconWidget',
+                iconWidget: Icon(Icons.abc),
+                iconTooltip: 'tooltip',
+                // icon: CupertinoIcons.doc_on_doc,
               ),
               PullDownMenuItem(
                 onTap: () {},
-                title: 'Edit',
-                icon: CupertinoIcons.pencil,
+                title: 'replaceIconWidget',
+                replaceIconWidget: IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.reply),
+                ),
+              ),
+            ],
+          ),
+          PullDownMenuActionsRow.medium(
+            items: [
+              PullDownMenuItem(
+                onTap: () {},
+                title: 'icon',
+                icon: CupertinoIcons.arrowshape_turn_up_left,
+              ),
+              PullDownMenuItem(
+                onTap: () {},
+                title: 'iconWidget',
+                iconWidget: Icon(Icons.abc),
+                iconTooltip: 'tooltip',
+                // icon: CupertinoIcons.doc_on_doc,
+              ),
+              PullDownMenuItem(
+                onTap: () {},
+                title: 'replaceIconWidget',
+                iconTooltip: 'tooltip',
+                replaceIconWidget: IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.reply),
+                ),
               ),
             ],
           ),
           const PullDownMenuDivider.large(),
           PullDownMenuItem(
             onTap: () {},
-            title: 'Pin',
-            icon: CupertinoIcons.pin,
+            // title: 'Pin',
+            contentWidget: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    color: Colors.blue,
+                    height: 50,
+                  ),
+                ),
+              ],
+            ),
+            // icon: CupertinoIcons.pin,
           ),
           PullDownMenuItem(
             title: 'Forward',

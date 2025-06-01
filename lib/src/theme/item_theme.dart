@@ -26,6 +26,7 @@ class PullDownMenuItemTheme with Diagnosticable {
     this.onHoverBackgroundColor,
     this.onPressedBackgroundColor,
     this.onHoverTextColor,
+    this.iconSize,
   });
 
   /// Creates default set of properties used to configure
@@ -87,6 +88,8 @@ class PullDownMenuItemTheme with Diagnosticable {
   /// [PullDownButtonTheme].
   static PullDownMenuItemTheme? maybeOf(BuildContext context) =>
       PullDownButtonTheme.maybeOf(context)?.itemTheme;
+
+  final double? iconSize;
 
   /// Returns an opacity level for disabled state for specific [Brightness].
   ///

@@ -6,7 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../pull_down_button.dart';
 import '_internals/extensions.dart';
-import '_internals/menu_config.dart';
+import 'config/menu_config.dart';
 import '_internals/route.dart';
 
 /// Used to configure how the [PullDownButton] positions its pull-down menu.

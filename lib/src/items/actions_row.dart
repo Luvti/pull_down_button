@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 import '../../pull_down_button.dart';
-import '../_internals/menu_config.dart';
+import '../config/menu_config.dart';
 import 'divider.dart';
 
 /// Displays several actions in a more compact way (in a row, 3 or 4 items
@@ -18,12 +18,14 @@ class PullDownMenuActionsRow extends StatelessWidget
   const PullDownMenuActionsRow.small({
     super.key,
     required this.items,
+    this.showVerticalSeparators = false,
   }) : _size = ElementSize.small;
 
   /// Creates a row of 3 actions at max; icon and short (one-worded) title.
   const PullDownMenuActionsRow.medium({
     super.key,
     required this.items,
+    this.showVerticalSeparators = false,
   }) : _size = ElementSize.medium;
 
   /// The size of descendant [PullDownMenuItem]s.
@@ -35,6 +37,7 @@ class PullDownMenuActionsRow extends StatelessWidget
   /// [PullDownMenuActionsRow.small] and 3 for [PullDownMenuActionsRow.medium]
   /// to avoid icon and text overflows.
   final List<PullDownMenuItem> items;
+  final bool showVerticalSeparators;
 
   /// Returns fixed height for [PullDownMenuItem] in [PullDownMenuActionsRow].
   double _height(BuildContext context) => switch (_size) {
@@ -68,14 +71,12 @@ class PullDownMenuActionsRow extends StatelessWidget
   Widget build(BuildContext context) {
     assert(_debugHasCorrectItemsCount(), '');
 
-    return ConstrainedBox(
-      constraints: BoxConstraints.tightFor(
-        height: _height(context),
-      ),
-      child: ActionsRowSizeConfig(
-        size: _size,
+    return ActionsRowSizeConfig(
+      size: _size,
+      child: IntrinsicHeight(
         child: Row(
-          children: MenuSeparator.wrapSideBySide(items),
+          children: MenuSeparator.wrapSideBySide(items,
+              showVerticalSeparators: showVerticalSeparators),
         ),
       ),
     );

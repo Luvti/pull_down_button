@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../../pull_down_button.dart';
 import '../_internals/animation.dart';
 import '../_internals/button.dart';
 import '../_internals/content_size_category.dart';
 import '../_internals/item_layout.dart';
-import '../_internals/menu_config.dart';
+import '../config/menu_config.dart';
 import '../_internals/route.dart';
 
 const double _kItemVerticalPadding = 11;
@@ -59,14 +60,21 @@ class PullDownMenuItem extends StatelessWidget implements PullDownMenuEntry {
     required this.onTap,
     this.tapHandler = defaultTapHandler,
     this.enabled = true,
-    required this.title,
+    this.title,
+    this.iconTooltip,
+    this.contentWidget,
     this.subtitle,
     this.itemTheme,
     this.icon,
     this.iconColor,
     this.iconWidget,
+    this.replaceIconWidget,
     this.isDestructive = false,
   })  : selected = null,
+        assert(
+          title == null || contentWidget == null || replaceIconWidget == null,
+          'Please provide either title or child',
+        ),
         assert(
           icon == null || iconWidget == null,
           'Please provide either icon or iconWidget',
@@ -80,12 +88,15 @@ class PullDownMenuItem extends StatelessWidget implements PullDownMenuEntry {
     required this.onTap,
     this.tapHandler = defaultTapHandler,
     this.enabled = true,
-    required this.title,
+    this.title,
+    this.iconTooltip,
+    this.contentWidget,
     this.subtitle,
     this.itemTheme,
     this.icon,
     this.iconColor,
     this.iconWidget,
+    this.replaceIconWidget,
     this.isDestructive = false,
     this.selected = false,
   }) : assert(
@@ -118,7 +129,9 @@ class PullDownMenuItem extends StatelessWidget implements PullDownMenuEntry {
   final bool enabled;
 
   /// Title of this [PullDownMenuItem].
-  final String title;
+  final String? title;
+
+  final Widget? contentWidget;
 
   /// Subtitle of this [PullDownMenuItem].
   final String? subtitle;
@@ -152,7 +165,13 @@ class PullDownMenuItem extends StatelessWidget implements PullDownMenuEntry {
   /// If the [icon] is used, this property must be null;
   ///
   /// If used in [PullDownMenuActionsRow], either this or [icon] is required.
-  final Widget? iconWidget;
+  /// Used with color resolved
+  final Icon? iconWidget;
+
+  final String? iconTooltip;
+
+  /// replace icon and color resolved
+  final Widget? replaceIconWidget;
 
   /// Whether this item represents destructive action;
   ///
@@ -232,7 +251,7 @@ class PullDownMenuItem extends StatelessWidget implements PullDownMenuEntry {
         return switch (size) {
           ElementSize.small ||
           ElementSize.medium =>
-            icon != null || iconWidget != null,
+            icon != null || iconWidget != null || replaceIconWidget != null,
           ElementSize.large => true
         };
       }(),
@@ -254,10 +273,26 @@ class PullDownMenuItem extends StatelessWidget implements PullDownMenuEntry {
     );
 
     final isEnabled = enabled && onTap != null;
-
-    final child = switch (size) {
+    final iconTemp =
+        iconWidget != null ? iconWidget : (icon != null ? Icon(icon) : null);
+    final iconTempTooltip = iconTooltip != null
+        ? Tooltip(
+            message: iconTooltip,
+            child: iconTemp,
+          )
+        : iconTemp;
+    final replaceIconWidgetTooltip = replaceIconWidget != null
+        ? (iconTooltip != null
+            ? Tooltip(
+                message: iconTooltip,
+                child: replaceIconWidget,
+              )
+            : replaceIconWidget)
+        : null;
+    final childLocal = switch (size) {
       ElementSize.small => _SmallItem(
-          icon: iconWidget ?? Icon(icon),
+          icon: iconTempTooltip,
+          replaceIconWidget: replaceIconWidgetTooltip,
           destructiveColor: theme.destructiveColor!,
           onHoverColor: theme.onHoverTextColor!,
           color: iconColor ?? theme.iconActionTextStyle!.color!,
@@ -265,18 +300,20 @@ class PullDownMenuItem extends StatelessWidget implements PullDownMenuEntry {
           destructive: isDestructive,
         ),
       ElementSize.medium => _MediumItem(
-          icon: iconWidget ?? Icon(icon),
+          icon: iconTempTooltip,
+          replaceIconWidget: replaceIconWidgetTooltip,
           destructiveColor: theme.destructiveColor!,
           onHoverColor: theme.onHoverTextColor!,
           iconColor: iconColor,
           enabled: isEnabled,
           destructive: isDestructive,
           title: title,
+          child: contentWidget,
           titleStyle: theme.iconActionTextStyle!,
         ),
       ElementSize.large => _LargeItem(
-          icon: icon,
-          iconWidget: iconWidget,
+          icon: iconTempTooltip,
+          replaceIconWidget: replaceIconWidgetTooltip,
           destructiveColor: theme.destructiveColor!,
           onHoverColor: theme.onHoverTextColor!,
           iconColor: iconColor,
@@ -291,6 +328,7 @@ class PullDownMenuItem extends StatelessWidget implements PullDownMenuEntry {
                 )
               : null,
           title: title,
+          child: contentWidget,
           titleStyle: theme.textStyle!,
           subtitle: subtitle,
           subtitleStyle: theme.subtitleStyle!,
@@ -306,7 +344,7 @@ class PullDownMenuItem extends StatelessWidget implements PullDownMenuEntry {
           onTap: enabled ? () => tapHandler(context, onTap) : null,
           pressedColor: theme.onPressedBackgroundColor!,
           hoverColor: theme.onHoverBackgroundColor!,
-          child: child,
+          child: childLocal,
         ),
       ),
     );
@@ -318,6 +356,7 @@ class PullDownMenuItem extends StatelessWidget implements PullDownMenuEntry {
 class _SmallItem extends StatelessWidget {
   const _SmallItem({
     required this.icon,
+    required this.replaceIconWidget,
     required this.destructiveColor,
     required this.onHoverColor,
     required this.color,
@@ -325,7 +364,8 @@ class _SmallItem extends StatelessWidget {
     required this.destructive,
   });
 
-  final Widget icon;
+  final Widget? icon;
+  final Widget? replaceIconWidget;
   final Color destructiveColor;
   final Color onHoverColor;
   final Color color;
@@ -349,12 +389,13 @@ class _SmallItem extends StatelessWidget {
       );
     }
 
-    return Center(
-      child: IconBox(
-        color: resolvedColor,
-        child: icon,
-      ),
-    );
+    return replaceIconWidget ??
+        Center(
+          child: IconBox(
+            color: resolvedColor,
+            child: icon!,
+          ),
+        );
   }
 }
 
@@ -364,22 +405,26 @@ class _MediumItem extends StatelessWidget {
   /// Creates [_MediumItem].
   const _MediumItem({
     required this.icon,
+    required this.replaceIconWidget,
     required this.destructiveColor,
     required this.onHoverColor,
     required this.iconColor,
     required this.enabled,
     required this.destructive,
     required this.title,
+    required this.child,
     required this.titleStyle,
   });
 
-  final Widget icon;
+  final Widget? icon;
+  final Widget? replaceIconWidget;
   final Color destructiveColor;
   final Color onHoverColor;
   final Color? iconColor;
   final bool enabled;
   final bool destructive;
-  final String title;
+  final String? title;
+  final Widget? child;
   final TextStyle titleStyle;
 
   @override
@@ -411,19 +456,23 @@ class _MediumItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          IconBox.small(
-            color: resolvedColor,
-            child: icon,
-          ),
+          if (replaceIconWidget != null) replaceIconWidget!,
+          if (icon != null)
+            IconBox.small(
+              color: resolvedColor,
+              child: icon!,
+            ),
           const SizedBox(height: 1),
-          Text(
-            title,
-            style: resolvedStyle,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            softWrap: false,
-          ),
+          if (child != null) child!,
+          if (title != null)
+            Text(
+              title!,
+              style: resolvedStyle,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
+            ),
         ],
       ),
     );
@@ -436,7 +485,7 @@ class _LargeItem extends StatelessWidget {
   /// Creates [_LargeItem].
   const _LargeItem({
     required this.icon,
-    required this.iconWidget,
+    required this.replaceIconWidget,
     required this.destructiveColor,
     required this.onHoverColor,
     required this.iconColor,
@@ -444,20 +493,22 @@ class _LargeItem extends StatelessWidget {
     required this.destructive,
     required this.leading,
     required this.title,
+    required this.child,
     required this.titleStyle,
     required this.subtitle,
     required this.subtitleStyle,
   });
 
-  final IconData? icon;
-  final Widget? iconWidget;
+  final Widget? icon;
+  final Widget? replaceIconWidget;
   final Color destructiveColor;
   final Color onHoverColor;
   final Color? iconColor;
   final bool enabled;
   final bool destructive;
   final Widget? leading;
-  final String title;
+  final String? title;
+  final Widget? child;
   final TextStyle titleStyle;
   final String? subtitle;
   final TextStyle subtitleStyle;
@@ -496,14 +547,15 @@ class _LargeItem extends StatelessWidget {
       );
     }
 
-    Widget body = Text(
-      title,
-      style: resolvedStyle,
-      textAlign: TextAlign.start,
-      overflow: TextOverflow.ellipsis,
-      softWrap: false,
-      maxLines: maxLines,
-    );
+    Widget body = child ??
+        Text(
+          title!,
+          style: resolvedStyle,
+          textAlign: TextAlign.start,
+          overflow: TextOverflow.ellipsis,
+          softWrap: false,
+          maxLines: maxLines,
+        );
 
     if (subtitle != null) {
       body = Column(
@@ -524,7 +576,7 @@ class _LargeItem extends StatelessWidget {
     }
 
     final hasIcon =
-        !isInAccessibilityMode && (icon != null || iconWidget != null);
+        !isInAccessibilityMode && (icon != null || replaceIconWidget != null);
     final hasLeading = leading != null;
 
     if (hasLeading || hasIcon) {
@@ -541,7 +593,7 @@ class _LargeItem extends StatelessWidget {
               padding: const EdgeInsetsDirectional.only(start: 8),
               child: IconBox(
                 color: resolvedColor,
-                child: iconWidget ?? Icon(icon),
+                child: replaceIconWidget ?? icon!,
               ),
             ),
         ],
