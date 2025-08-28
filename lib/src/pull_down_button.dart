@@ -5,9 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import '../pull_down_button.dart';
-import '_internals/extensions.dart';
-import 'config/menu_config.dart';
 import '_internals/route.dart';
+import 'overlay/overlay_menu_wrapper.dart';
 
 /// Used to configure how the [PullDownButton] positions its pull-down menu.
 ///
@@ -207,6 +206,7 @@ class PullDownButton extends StatefulWidget {
     super.key,
     required this.itemBuilder,
     required this.buttonBuilder,
+    this.controller,
     this.onCanceled,
     this.position = PullDownMenuPosition.automatic,
     this.itemsOrder = PullDownMenuItemsOrder.downwards,
@@ -235,6 +235,11 @@ class PullDownButton extends StatefulWidget {
   /// Builder that provides [BuildContext] as well as the `showMenu` function to
   /// pass to any custom button widget.
   final PullDownMenuButtonBuilder buttonBuilder;
+
+  /// Controller for managing menu state externally.
+  ///
+  /// If provided, allows external control over menu visibility.
+  final PullDownMenuController? controller;
 
   /// Called when the user dismisses the pull-down menu.
   final PullDownMenuCanceled? onCanceled;
@@ -381,17 +386,84 @@ class PullDownButton extends StatefulWidget {
   State<PullDownButton> createState() => _PullDownButtonState();
 }
 
-class _PullDownButtonState extends State<PullDownButton> {
+class _PullDownButtonState extends State<PullDownButton>
+    with TickerProviderStateMixin {
   PullDownButtonAnimationState state = PullDownButtonAnimationState.closed;
+  OverlayEntry? _overlayEntry;
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+  StreamSubscription<void>? _controllerSubscription;
 
-  Future<void> showButtonMenu() async {
-    final navigator = Navigator.of(
-      context,
-      rootNavigator: widget.useRootNavigator,
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      reverseDuration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
     );
 
-    final overlay = navigator.overlay!.context.currentRenderBox;
-    var button = context.getRect(ancestor: overlay);
+    _setupControllerListener();
+  }
+
+  @override
+  void dispose() {
+    _controllerSubscription?.cancel();
+    _removeOverlay();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(PullDownButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      _setupControllerListener();
+    }
+  }
+
+  void _setupControllerListener() {
+    _controllerSubscription?.cancel();
+    if (widget.controller != null) {
+      _controllerSubscription = widget.controller!.closeStream.listen((_) {
+        if (_overlayEntry != null) {
+          _handleMenuDismiss();
+        }
+      });
+    }
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  Future<void> showButtonMenu() async {
+    if (_overlayEntry != null) return;
+
+    final overlay = Overlay.of(
+      context,
+      rootOverlay: widget.useRootNavigator,
+    );
+
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+
+    final overlayRenderBox = overlay.context.findRenderObject() as RenderBox?;
+    if (overlayRenderBox == null) return;
+
+    var button = Rect.fromPoints(
+      renderBox.localToGlobal(Offset.zero, ancestor: overlayRenderBox),
+      renderBox.localToGlobal(
+        renderBox.size.bottomRight(Offset.zero),
+        ancestor: overlayRenderBox,
+      ),
+    );
 
     if (widget.buttonAnchor != null) {
       button = _anchorToButtonPart(context, button, widget.buttonAnchor!);
@@ -408,30 +480,54 @@ class _PullDownButtonState extends State<PullDownButton> {
 
     setState(() => state = PullDownButtonAnimationState.opened);
 
-    final action = await _showMenu<VoidCallback>(
-      context: context,
-      items: items,
-      buttonRect: button,
-      menuPosition: widget.position,
-      itemsOrder: widget.itemsOrder,
-      routeTheme: widget.routeTheme,
-      hasLeading: hasLeading,
-      animationAlignment: animationAlignment,
-      menuOffset: widget.menuOffset,
-      scrollController: widget.scrollController,
-      useRootNavigator: widget.useRootNavigator,
-      routeSettings: widget.routeSettings,
+    widget.controller?.setMenuOpen(isOpen: true);
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => OverlayMenuWrapper(
+        buttonRect: button,
+        items: items,
+        menuPosition: widget.position,
+        itemsOrder: widget.itemsOrder,
+        routeTheme: widget.routeTheme,
+        hasLeading: hasLeading,
+        animationAlignment: animationAlignment,
+        menuOffset: widget.menuOffset,
+        scrollController: widget.scrollController,
+        animation: _animation,
+        onDismiss: _handleMenuDismiss,
+        onItemSelected: _handleItemSelected,
+      ),
     );
 
-    if (!mounted) return;
+    overlay.insert(_overlayEntry!);
+    await _animationController.forward();
+  }
 
+  void _handleMenuDismiss() {
+    _closeMenu();
+    widget.onCanceled?.call();
+  }
+
+  Future<void> _handleItemSelected(VoidCallback action) async {
+    await _closeMenu();
+    action.call();
+  }
+
+  Future<void> _closeMenu() async {
+    if (_overlayEntry == null) {
+      return;
+    }
+
+    await _animationController.reverse();
+
+    if (!mounted) {
+      return;
+    }
+
+    _removeOverlay();
     setState(() => state = PullDownButtonAnimationState.closed);
 
-    if (action != null) {
-      action.call();
-    } else {
-      widget.onCanceled?.call();
-    }
+    widget.controller?.setMenuOpen(isOpen: false);
   }
 
   @override
@@ -513,7 +609,7 @@ Future<void> showPullDownMenu({
 
   final hasLeading = MenuConfig.menuHasLeading(items);
 
-  final action = await _showMenu<VoidCallback>(
+  await _showOverlayMenu(
     context: context,
     items: items,
     buttonRect: position,
@@ -525,7 +621,38 @@ Future<void> showPullDownMenu({
     menuOffset: menuOffset,
     scrollController: scrollController,
     useRootNavigator: useRootNavigator,
-    routeSettings: routeSettings,
+    onCanceled: onCanceled,
+  );
+}
+
+/// Shows overlay menu for showPullDownMenu function
+Future<void> _showOverlayMenu({
+  required BuildContext context,
+  required List<PullDownMenuEntry> items,
+  required Rect buttonRect,
+  required PullDownMenuPosition menuPosition,
+  required PullDownMenuItemsOrder itemsOrder,
+  required PullDownMenuRouteTheme? routeTheme,
+  required bool hasLeading,
+  required Alignment animationAlignment,
+  required double menuOffset,
+  required ScrollController? scrollController,
+  required bool useRootNavigator,
+  required PullDownMenuCanceled? onCanceled,
+}) async {
+  final action = await _showMenu<VoidCallback>(
+    context: context,
+    items: items,
+    buttonRect: buttonRect,
+    menuPosition: menuPosition,
+    itemsOrder: itemsOrder,
+    routeTheme: routeTheme,
+    hasLeading: hasLeading,
+    animationAlignment: animationAlignment,
+    menuOffset: menuOffset,
+    scrollController: scrollController,
+    useRootNavigator: useRootNavigator,
+    routeSettings: null,
   );
 
   if (action != null) {

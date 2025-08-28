@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import '../../pull_down_button.dart';
 import '../_internals/content_size_category.dart';
 import '../_internals/item_layout.dart';
-import '../config/menu_config.dart';
 
 /// Used to configure how [PullDownMenuTitle.title] is aligned.
 enum PullDownMenuTitleAlignment {

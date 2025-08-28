@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_redundant_argument_values, avoid_print
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,9 +16,21 @@ void main() {
   runApp(const MyApp());
 }
 
-@immutable
-class Example extends StatelessWidget {
+class Example extends StatefulWidget {
   const Example({super.key});
+
+  @override
+  State<Example> createState() => _ExampleState();
+}
+
+class _ExampleState extends State<Example> {
+  final PullDownMenuController _controller = PullDownMenuController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,26 +42,65 @@ class Example extends StatelessWidget {
       bottom: 24 + edgeInsets.bottom,
     );
 
-    return ListView.separated(
-      padding: padding,
-      reverse: true,
-      itemBuilder: (context, index) {
-        final isSender = index.isEven;
-
-        return Align(
-          alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
-          child: ExampleMenu(
-            builder: (_, showMenu) => CupertinoButton(
-              onPressed: showMenu,
-              padding: EdgeInsets.zero,
-              pressedOpacity: 1,
-              child: _MessageExample(isSender: isSender),
-            ),
+    return Column(
+      children: [
+        const SizedBox(height: 40),
+        Container(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              MouseRegion(
+                onEnter: (_) {
+                  final closed = _controller.close();
+                  print(closed ? 'Menu closed' : 'Menu already closed');
+                },
+                child: CupertinoButton.filled(
+                  onPressed: () {},
+                  child: const Text('Close Menu'),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: ListenableBuilder(
+                  listenable: _controller,
+                  builder: (context, _) {
+                    return Text(
+                      'Menu: ${_controller.isMenuOpen ? "Opened" : "Closed"}',
+                      style: CupertinoTheme.of(context).textTheme.textStyle,
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        );
-      },
-      separatorBuilder: (_, __) => const SizedBox(height: 16),
-      itemCount: 20,
+        ),
+        // Main list items
+        Expanded(
+          child: ListView.separated(
+            padding: padding,
+            reverse: true,
+            itemBuilder: (context, index) {
+              final isSender = index.isEven;
+
+              return Align(
+                alignment:
+                    isSender ? Alignment.centerRight : Alignment.centerLeft,
+                child: ExampleMenu(
+                  controller: _controller,
+                  builder: (_, showMenu) => CupertinoButton(
+                    onPressed: showMenu,
+                    padding: EdgeInsets.zero,
+                    pressedOpacity: 1,
+                    child: _MessageExample(isSender: isSender),
+                  ),
+                ),
+              );
+            },
+            separatorBuilder: (_, __) => const SizedBox(height: 16),
+            itemCount: 20,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -59,12 +110,15 @@ class ExampleMenu extends StatelessWidget {
   const ExampleMenu({
     super.key,
     required this.builder,
+    this.controller,
   });
 
   final PullDownMenuButtonBuilder builder;
+  final PullDownMenuController? controller;
 
   @override
   Widget build(BuildContext context) => PullDownButton(
+        controller: controller,
         itemBuilder: (context) => [
           PullDownMenuHeader(
             leading: ColoredBox(
@@ -72,7 +126,9 @@ class ExampleMenu extends StatelessWidget {
             ),
             title: 'Profile',
             subtitle: 'Tap to open',
-            onTap: () {},
+            onTap: () {
+              print('Header tap!');
+            },
             icon: CupertinoIcons.profile_circled,
           ),
           const PullDownMenuDivider.large(),
@@ -84,9 +140,11 @@ class ExampleMenu extends StatelessWidget {
                 icon: CupertinoIcons.arrowshape_turn_up_left,
               ),
               PullDownMenuItem(
-                onTap: () {},
+                onTap: () {
+                  print('iconWidget tap!');
+                },
                 title: 'iconWidget',
-                iconWidget: Icon(Icons.abc),
+                iconWidget: const Icon(Icons.abc),
                 iconTooltip: 'tooltip',
                 // icon: CupertinoIcons.doc_on_doc,
               ),
@@ -95,7 +153,7 @@ class ExampleMenu extends StatelessWidget {
                 title: 'replaceIconWidget',
                 replaceIconWidget: IconButton(
                   onPressed: () {},
-                  icon: Icon(Icons.reply),
+                  icon: const Icon(Icons.reply),
                 ),
               ),
             ],
@@ -110,7 +168,7 @@ class ExampleMenu extends StatelessWidget {
               PullDownMenuItem(
                 onTap: () {},
                 title: 'iconWidget',
-                iconWidget: Icon(Icons.abc),
+                iconWidget: const Icon(Icons.abc),
                 iconTooltip: 'tooltip',
                 // icon: CupertinoIcons.doc_on_doc,
               ),
@@ -120,7 +178,7 @@ class ExampleMenu extends StatelessWidget {
                 iconTooltip: 'tooltip',
                 replaceIconWidget: IconButton(
                   onPressed: () {},
-                  icon: Icon(Icons.reply),
+                  icon: const Icon(Icons.reply),
                 ),
               ),
             ],
@@ -144,11 +202,15 @@ class ExampleMenu extends StatelessWidget {
           PullDownMenuItem(
             title: 'Forward',
             subtitle: 'Share in different channel',
-            onTap: () {},
+            onTap: () {
+              print('Forward item tap!');
+            },
             icon: CupertinoIcons.arrowshape_turn_up_right,
           ),
           PullDownMenuItem(
-            onTap: () {},
+            onTap: () {
+              print('Delete item tap!');
+            },
             title: 'Delete',
             isDestructive: true,
             icon: CupertinoIcons.delete,

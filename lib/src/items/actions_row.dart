@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
 import '../../pull_down_button.dart';
-import '../config/menu_config.dart';
 import 'divider.dart';
 
 /// Displays several actions in a more compact way (in a row, 3 or 4 items
@@ -75,8 +74,10 @@ class PullDownMenuActionsRow extends StatelessWidget
       size: _size,
       child: IntrinsicHeight(
         child: Row(
-          children: MenuSeparator.wrapSideBySide(items,
-              showVerticalSeparators: showVerticalSeparators),
+          children: MenuSeparator.wrapSideBySide(
+            items,
+            showVerticalSeparators: showVerticalSeparators,
+          ),
         ),
       ),
     );

@@ -16,9 +16,12 @@ class ExampleButton extends StatelessWidget {
   Widget build(BuildContext context) => CupertinoButton(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         color: CupertinoColors.systemGreen,
-        minSize: MediaQuery.textScalerOf(context).scale(34),
         onPressed: onTap,
         pressedOpacity: 1,
+        minimumSize: Size(
+          MediaQuery.textScalerOf(context).scale(34),
+          MediaQuery.textScalerOf(context).scale(34),
+        ),
         child: const Text('Button'),
       );
 }

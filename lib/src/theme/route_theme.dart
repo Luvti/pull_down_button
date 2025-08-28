@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 import '../../pull_down_button.dart';
 import '../_internals/content_size_category.dart';

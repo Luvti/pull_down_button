@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../pull_down_button.dart';
@@ -6,7 +5,6 @@ import '../_internals/animation.dart';
 import '../_internals/button.dart';
 import '../_internals/content_size_category.dart';
 import '../_internals/item_layout.dart';
-import '../config/menu_config.dart';
 import '../_internals/route.dart';
 
 const double _kItemVerticalPadding = 11;
@@ -273,8 +271,7 @@ class PullDownMenuItem extends StatelessWidget implements PullDownMenuEntry {
     );
 
     final isEnabled = enabled && onTap != null;
-    final iconTemp =
-        iconWidget != null ? iconWidget : (icon != null ? Icon(icon) : null);
+    final iconTemp = iconWidget ?? (icon != null ? Icon(icon) : null);
     final iconTempTooltip = iconTooltip != null
         ? Tooltip(
             message: iconTooltip,
@@ -549,7 +546,7 @@ class _LargeItem extends StatelessWidget {
 
     Widget body = child ??
         Text(
-          title!,
+          title ?? '',
           style: resolvedStyle,
           textAlign: TextAlign.start,
           overflow: TextOverflow.ellipsis,
