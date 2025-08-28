@@ -62,12 +62,15 @@ class MyHomePage extends StatelessWidget {
             padding: EdgeInsets.zero,
             child: Icon(CupertinoIcons.sun_max_fill),
           ),
-          middle: Text(
-            'PullDownButton',
-            style: TextStyle(
-              color: CupertinoDynamicColor.resolve(
-                CupertinoColors.label,
-                context,
+          middle: Tooltip(
+            message: 'PullDownButton',
+            child: Text(
+              'PullDownButton',
+              style: TextStyle(
+                color: CupertinoDynamicColor.resolve(
+                  CupertinoColors.label,
+                  context,
+                ),
               ),
             ),
           ),
