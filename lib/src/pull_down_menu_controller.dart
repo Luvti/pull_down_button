@@ -11,7 +11,7 @@ import '../pull_down_button.dart';
 class PullDownMenuController extends ChangeNotifier {
   /// Creates a new [PullDownMenuController].
   PullDownMenuController();
-  StreamController<void>? _closeStreamController;
+  StreamController<bool>? _closeStreamController;
   bool _isMenuOpen = false;
 
   /// Whether the menu is currently open.
@@ -19,18 +19,18 @@ class PullDownMenuController extends ChangeNotifier {
 
   /// Stream that emits when the menu should be closed.
   /// Internal use only.
-  Stream<void> get closeStream {
-    _closeStreamController ??= StreamController<void>.broadcast();
+  Stream<bool> get closeStream {
+    _closeStreamController ??= StreamController<bool>.broadcast();
     return _closeStreamController!.stream;
   }
 
   /// Closes the menu if it's currently open.
   ///
   /// Returns `true` if the menu was open and closed, `false` otherwise.
-  bool close() {
+  bool close({bool handleCancel = true}) {
     if (!_isMenuOpen) return false;
 
-    _closeStreamController?.add(null);
+    _closeStreamController?.add(handleCancel);
     return true;
   }
 

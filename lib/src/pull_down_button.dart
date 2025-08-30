@@ -430,9 +430,10 @@ class _PullDownButtonState extends State<PullDownButton>
   void _setupControllerListener() {
     _controllerSubscription?.cancel();
     if (widget.controller != null) {
-      _controllerSubscription = widget.controller!.closeStream.listen((_) {
+      _controllerSubscription =
+          widget.controller!.closeStream.listen((bool handleCancel) {
         if (_overlayEntry != null) {
-          _handleMenuDismiss();
+          _handleMenuDismiss(handleCancel: handleCancel);
         }
       });
     }
@@ -503,9 +504,11 @@ class _PullDownButtonState extends State<PullDownButton>
     await _animationController.forward();
   }
 
-  void _handleMenuDismiss() {
+  void _handleMenuDismiss({bool handleCancel = true}) {
     _closeMenu();
-    widget.onCanceled?.call();
+    if (handleCancel) {
+      widget.onCanceled?.call();
+    }
   }
 
   Future<void> _handleItemSelected(VoidCallback action) async {

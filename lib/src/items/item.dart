@@ -4,6 +4,7 @@ import '../../pull_down_button.dart';
 import '../_internals/animation.dart';
 import '../_internals/button.dart';
 import '../_internals/content_size_category.dart';
+import '../_internals/custom_tooltip.dart';
 import '../_internals/item_layout.dart';
 import '../_internals/route.dart';
 
@@ -272,17 +273,17 @@ class PullDownMenuItem extends StatelessWidget implements PullDownMenuEntry {
 
     final isEnabled = enabled && onTap != null;
     final iconTemp = iconWidget ?? (icon != null ? Icon(icon) : null);
-    final iconTempTooltip = iconTooltip != null
-        ? Tooltip(
-            message: iconTooltip,
+    final iconTempTooltip = (iconTooltip != null && iconTemp != null)
+        ? CustomTooltip(
+            message: iconTooltip!,
             child: iconTemp,
           )
         : iconTemp;
     final replaceIconWidgetTooltip = replaceIconWidget != null
         ? (iconTooltip != null
-            ? Tooltip(
-                message: iconTooltip,
-                child: replaceIconWidget,
+            ? CustomTooltip(
+                message: iconTooltip!,
+                child: replaceIconWidget!,
               )
             : replaceIconWidget)
         : null;

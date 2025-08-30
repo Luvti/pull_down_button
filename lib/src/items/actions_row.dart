@@ -36,17 +36,9 @@ class PullDownMenuActionsRow extends StatelessWidget
   /// [PullDownMenuActionsRow.small] and 3 for [PullDownMenuActionsRow.medium]
   /// to avoid icon and text overflows.
   final List<PullDownMenuItem> items;
-  final bool showVerticalSeparators;
 
-  /// Returns fixed height for [PullDownMenuItem] in [PullDownMenuActionsRow].
-  double _height(BuildContext context) => switch (_size) {
-        ElementSize.small => ElementSize.resolveLarge(context),
-        ElementSize.medium => ElementSize.resolveMedium(context),
-        ElementSize.large => throw UnsupportedError(
-            '[PullDownMenuActionsRow] only supports `ElementSize.small` '
-            'and `ElementSize.medium`',
-          )
-      };
+  ///
+  final bool showVerticalSeparators;
 
   @protected
   bool _debugHasCorrectItemsCount() {
