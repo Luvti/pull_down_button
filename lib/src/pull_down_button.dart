@@ -218,6 +218,7 @@ class PullDownButton extends StatefulWidget {
     this.animationAlignmentOverride,
     this.useRootNavigator = false,
     this.routeSettings,
+    this.rebuildStream,
   });
 
   /// Called when the button is pressed to create the items to show in the menu.
@@ -362,6 +363,27 @@ class PullDownButton extends StatefulWidget {
   /// See [RouteSettings] for details.
   final RouteSettings? routeSettings;
 
+  /// Optional stream that triggers widget rebuild.
+  ///
+  /// When this stream emits, the button will rebuild via setState.
+  /// Useful for integrating with BLoC, Stream, or other state management
+  /// solutions that don't trigger rebuilds properly when wrapping this widget.
+  ///
+  /// Example:
+  /// ```dart
+  /// final controller = StreamController<void>();
+  ///
+  /// PullDownButton(
+  ///   rebuildStream: controller.stream,
+  ///   itemBuilder: (context) => [...],
+  ///   buttonBuilder: (context, showMenu) => ...,
+  /// )
+  ///
+  /// // Trigger rebuild
+  /// controller.add(null);
+  /// ```
+  final Stream<void>? rebuildStream;
+
   /// Default animation builder for [animationBuilder].
   ///
   /// If [state] is [PullDownButtonAnimationState.opened], apply opacity
@@ -477,8 +499,6 @@ class _PullDownButtonState extends State<PullDownButton>
 
     if (items.isEmpty) return;
 
-    final hasLeading = MenuConfig.menuHasLeading(items);
-
     setState(() => state = PullDownButtonAnimationState.opened);
 
     widget.controller?.setMenuOpen(isOpen: true);
@@ -486,15 +506,15 @@ class _PullDownButtonState extends State<PullDownButton>
     _overlayEntry = OverlayEntry(
       builder: (context) => OverlayMenuWrapper(
         buttonRect: button,
-        items: items,
+        itemBuilder: widget.itemBuilder,
         menuPosition: widget.position,
         itemsOrder: widget.itemsOrder,
         routeTheme: widget.routeTheme,
-        hasLeading: hasLeading,
         animationAlignment: animationAlignment,
         menuOffset: widget.menuOffset,
         scrollController: widget.scrollController,
         animation: _animation,
+        rebuildStream: widget.rebuildStream,
         onDismiss: _handleMenuDismiss,
         onItemSelected: _handleItemSelected,
       ),
