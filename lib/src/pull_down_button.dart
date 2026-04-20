@@ -219,7 +219,19 @@ class PullDownButton extends StatefulWidget {
     this.useRootNavigator = false,
     this.routeSettings,
     this.rebuildStream,
+    this.animationDuration = const Duration(milliseconds: 300),
+    this.animationReverseDuration = const Duration(milliseconds: 200),
   });
+
+  /// The duration of the menu's opening animation.
+  ///
+  /// Defaults to 300 milliseconds.
+  final Duration animationDuration;
+
+  /// The duration of the menu's closing animation.
+  ///
+  /// Defaults to 200 milliseconds.
+  final Duration animationReverseDuration;
 
   /// Called when the button is pressed to create the items to show in the menu.
   ///
@@ -420,8 +432,8 @@ class _PullDownButtonState extends State<PullDownButton>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      reverseDuration: const Duration(milliseconds: 200),
+      duration: widget.animationDuration,
+      reverseDuration: widget.animationReverseDuration,
       vsync: this,
     );
     _animation = CurvedAnimation(
@@ -446,6 +458,12 @@ class _PullDownButtonState extends State<PullDownButton>
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       _setupControllerListener();
+    }
+    if (widget.animationDuration != oldWidget.animationDuration) {
+      _animationController.duration = widget.animationDuration;
+    }
+    if (widget.animationReverseDuration != oldWidget.animationReverseDuration) {
+      _animationController.reverseDuration = widget.animationReverseDuration;
     }
   }
 
@@ -541,16 +559,26 @@ class _PullDownButtonState extends State<PullDownButton>
       return;
     }
 
-    await _animationController.reverse();
+    try {
+      // Анимация закрытия длится 200мс.
+      // Если Ticker поставлен на паузу (например, при навигации на другой экран),
+      // reverse() зависнет навсегда. Поэтому ограничиваем ожидание (timeout).
+      await Future.any([
+        _animationController.reverse().orCancel,
+        Future<void>.delayed(
+          widget.animationReverseDuration + const Duration(milliseconds: 50),
+        ),
+      ]);
+    } catch (_) {
+      // Игнорируем TickerCanceled
+    } finally {
+      _removeOverlay();
+      widget.controller?.setMenuOpen(isOpen: false);
 
-    if (!mounted) {
-      return;
+      if (mounted) {
+        setState(() => state = PullDownButtonAnimationState.closed);
+      }
     }
-
-    _removeOverlay();
-    setState(() => state = PullDownButtonAnimationState.closed);
-
-    widget.controller?.setMenuOpen(isOpen: false);
   }
 
   @override
