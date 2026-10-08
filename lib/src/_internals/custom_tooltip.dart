@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A custom tooltip that doesn't reserve space in the layout
 class CustomTooltip extends StatefulWidget {

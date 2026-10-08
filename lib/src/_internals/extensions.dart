@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:meta/meta.dart';
 
 /// Extension for [Rect] related calculations.

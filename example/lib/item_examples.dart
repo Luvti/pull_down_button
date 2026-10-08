@@ -1,5 +1,5 @@
+import 'package:cupertino_ui/cupertino_ui.dart' hide Title;
 import 'package:example/src/alignment_override.dart';
-import 'package:flutter/cupertino.dart' hide Title;
 import 'package:pull_down_button/pull_down_button.dart';
 
 import 'setup.dart';

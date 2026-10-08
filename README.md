@@ -15,8 +15,27 @@ Buttons from iOS 14+ to Flutter with some additional customisation options.
 
 ---
 
+## Requirements and imports
+
+This package requires Flutter 3.47 or newer and Dart 3.13 or newer. It uses the
+standalone `material_ui` and `cupertino_ui` packages.
+
+```dart
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:pull_down_button/pull_down_button.dart';
+```
+
+Add `material_ui` and/or `cupertino_ui` as direct dependencies in apps that import
+them. Configure `PullDownButtonTheme` through `material_ui`'s
+`ThemeData.extensions`, or use `PullDownButtonInheritedTheme` with a
+`cupertino_ui` `CupertinoApp`.
+
+---
+
 ### Contents:
 
+-   [Requirements and imports](#requirements-and-imports)
 -   [PullDownButton](#pulldownbutton)
     -   [PullDownMenuItem](#pulldownmenuitem)
     -   [PullDownMenuItem.selectable](#pulldownmenuitemselectable)

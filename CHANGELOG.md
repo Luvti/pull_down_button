@@ -1,3 +1,10 @@
+## Unreleased
+
+### Changed
+
+-   **Breaking:** migrate the library, example, and native comparison app to the standalone `material_ui` and `cupertino_ui` packages. `PullDownButtonTheme` now extends `material_ui`'s `ThemeExtension`.
+-   **Breaking:** require Flutter 3.47 or newer and Dart 3.13 or newer.
+
 ## 0.10.2
 
 ##### 2024-09-30 - Desktop scrollbar fixes
